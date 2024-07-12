@@ -153,6 +153,18 @@ function editNote(noteId, noteTitle, noteDesc) {
 
 function showSetting(el) {
     el.parentElement.classList.add('show')
+
+    // توضیح 
+    //اگر روی کل داکیومنت کلیکی شود 
+    // اگر رویداد اون کلیک مخالف تگ آی (جاییکه منوی ستینگ هست باشه)
+   // و یا ایونت مخالف کلیک روی خود همان الممنت باشه
+   
+   // از والد اون المنت کلاس نمایش رو حذف کنه
+   document.addEventListener('click',(event)=>{
+        if(event.target.tagName!== 'I' || event.target !=el ){
+        el.parentElement.classList.remove('show')
+        }
+    })
 }
 
 function getLocalStorageNotes() {
