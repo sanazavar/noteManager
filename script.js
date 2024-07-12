@@ -13,12 +13,21 @@ const addBox = $.querySelector('.add-box'),
 let notes = []
 
 let isUpdate = false
+let updateId = null
 
-addBox.addEventListener('click', () => {
+addBox.addEventListener('click', showModal)
+
+function showModal(noteTitle, noteDesc) {
+
+
 
     if (isUpdate) {
         popUpTitle.innerHTML = 'نوت رو ویرایش کن  '
         popUpBotton.innerHTML = ' ذخیره ویرایش'
+        popUpInput.value = noteTitle;
+        popUpTextarea.value = noteDesc;
+
+
     } else {
         popUpTitle.innerHTML = 'نوت جدید اضافه کن'
         popUpBotton.innerHTML = 'نوت رو ذخیره کن'
@@ -26,27 +35,49 @@ addBox.addEventListener('click', () => {
     popUpInput.focus()
     popUpbBox.classList.add('show')
 
-})
+
+}
 
 
 popUpBotton.addEventListener('click', () => {
 
-    let newNote = {
-        title: popUpInput.value,
-        descrption: popUpTextarea.value,
-        date: getNowDate(),
+
+    if (isUpdate) {
+        let allNotes = getLocalStorageNotes()
+        allNotes.some((note, index) => {
+            if (index === updateId) {
+                note.title = popUpInput.value;
+                note.description = popUpTextarea.value;
+            }
+          
+        })
+
+        setNotesInLocalSrorage(allNotes)
+        generateNots(allNotes)
+        closeModal()
+        clearInputs()
+
+        isUpdate=false
+    } else {
+
+        let newNote = {
+            title: popUpInput.value,
+            description: popUpTextarea.value,
+            date: getNowDate(),
+        }
+
+        notes.push(newNote)
+
+        setNotesInLocalSrorage(notes)
+        closeModal()
+
+        generateNots(notes)
+
+        clearInputs()
+
     }
 
-    notes.push(newNote)
 
-    setNotesInLocalSrorage(notes)
-    closeModal()
-
-    generateNots(notes)
-
-    clearInputs()
-
-    console.log(notes);
 })
 
 
@@ -61,20 +92,20 @@ function generateNots(notes) {
 
     $.querySelectorAll('.note').forEach(note => note.remove())
 
-    notes.forEach((note, index )=> {
+    notes.forEach((note, index) => {
         wrapperElem.insertAdjacentHTML('beforeend', `
             <li class="note">
         <div class="details">
           <p>${note.title}</p>
-          <span>${note.descrption}</span>
+          <span>${note.description}</span>
         </div>
         <div class="bottom-content">
           <span>${note.date}</span>
           <div class="settings">
             <i class="uil uil-ellipsis-h" onclick="showSetting(this)"></i>
             <ul class="menu">
-              <li>
-                <i class="uil uil-pen"></i>Edit
+              <li onclick="editNote(${index}, '${note.title}', '${note.description}')">
+             <i class="uil uil-pen"></i>Edit
               </li>
               <li onclick="removeNote(${index})">
                 <i class="uil uil-trash" ></i>Delete
@@ -89,22 +120,36 @@ function generateNots(notes) {
 }
 
 
+
 function removeNote(noteIndex) {
 
-    const deleted=confirm('are you sure to delete?')
+    const deleted = confirm('are you sure to delete?')
 
-    if(deleted){
+    if (deleted) {
         let newNote = getLocalStorageNotes()
 
         newNote.splice(noteIndex, 1)
-    
+
         setNotesInLocalSrorage(newNote)
         generateNots(newNote)
 
     }
 
-  
+
 }
+
+function editNote(noteId, noteTitle, noteDesc) {
+    console.log(noteId, noteTitle, noteDesc);
+
+    isUpdate = true
+    showModal(noteTitle, noteDesc)
+    updateId = noteId
+
+
+
+
+}
+
 
 function showSetting(el) {
     el.parentElement.classList.add('show')
